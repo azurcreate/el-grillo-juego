@@ -1,1 +1,16 @@
-
+{
+  "name": "El Grillo y su Viaje",
+  "short_name": "El Grillo",
+  "description": "Juego didáctico infantil sobre amistad, generosidad y viajes.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": [
+    "fullscreen",
+    "standalone"
+  ],
+  "background_color": "#1a202c",
+  "theme_color": "#800020",
+  "orientation": "landscape",
+  "lang": "es"
+}
