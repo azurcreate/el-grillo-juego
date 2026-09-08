@@ -638,7 +638,85 @@ body {
             keys[key] = value;
             AudioEngine.init();
         }
+const joystickArea = document.getElementById('joystick-area');
+const joystickBase = document.getElementById('joystick-base');
+const joystickStick = document.getElementById('joystick-stick');
+const jumpButton = document.getElementById('jump-button');
 
+let joystickPointerId = null;
+
+function resetJoystick() {
+    setKey('ArrowLeft', false);
+    setKey('ArrowRight', false);
+    setKey('ArrowUp', false);
+    setKey('ArrowDown', false);
+
+    joystickStick.style.transform = 'translate(0, 0)';
+}
+
+function updateJoystick(event) {
+    const rect = joystickBase.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+
+    let dx = event.clientX - centerX;
+    let dy = event.clientY - centerY;
+
+    const maxDistance = 25;
+    const distance = Math.hypot(dx, dy);
+
+    if (distance > maxDistance) {
+        dx = (dx / distance) * maxDistance;
+        dy = (dy / distance) * maxDistance;
+    }
+
+    joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    const threshold = 10;
+
+    setKey('ArrowLeft', dx < -threshold);
+    setKey('ArrowRight', dx > threshold);
+    setKey('ArrowUp', dy < -threshold);
+    setKey('ArrowDown', dy > threshold);
+}
+
+joystickArea.addEventListener('pointerdown', (event) => {
+    joystickPointerId = event.pointerId;
+    joystickArea.setPointerCapture(event.pointerId);
+    updateJoystick(event);
+    event.preventDefault();
+});
+
+joystickArea.addEventListener('pointermove', (event) => {
+    if (event.pointerId === joystickPointerId) {
+        updateJoystick(event);
+        event.preventDefault();
+    }
+});
+
+joystickArea.addEventListener('pointerup', (event) => {
+    if (event.pointerId === joystickPointerId) {
+        joystickPointerId = null;
+        resetJoystick();
+    }
+});
+
+joystickArea.addEventListener('pointercancel', resetJoystick);
+joystickArea.addEventListener('lostpointercapture', resetJoystick);
+
+jumpButton.addEventListener('pointerdown', (event) => {
+    setKey('ArrowUp', true);
+    AudioEngine.playHop();
+    event.preventDefault();
+});
+
+jumpButton.addEventListener('pointerup', () => {
+    setKey('ArrowUp', false);
+});
+
+jumpButton.addEventListener('pointercancel', () => {
+    setKey('ArrowUp', false);
+});
         // Bucle Principal
         function gameLoop() {
             if (gameState !== 'PAUSED') {
