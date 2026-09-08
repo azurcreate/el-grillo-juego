@@ -3,36 +3,735 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>El Grillo y su Viaje - Juego DidáłŁctico Infantil</title>
+    <title>El Grillo y su Viaje - Juego Didáctico Infantil</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuente Infantil -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family:'Nunito',sans-serif; background-color:#1a202c; margin:0; overflow:hidden; touch-action:none; user-select:none; }
-        :root { --bordo-marron:#5e2118; --granate:#800020; --verde-prado:#40916c; --cielo-alto:#3a86ff; --cielo-bajo:#bae6fd; }
-        #game-container { background:linear-gradient(to bottom,var(--cielo-alto) 0%,var(--cielo-bajo) 40%,#74c69d 40%,var(--verde-prado) 100%); position:relative; overflow:hidden; }
-        .cloud-animated { position:absolute; animation:moveClouds linear infinite; }
-        @keyframes moveClouds { 0% {transform:translateX(-150px)} 100% {transform:translateX(100vw)} }
-        .sun-glow { animation:pulseSun 3s ease-in-out infinite alternate; }
-        @keyframes pulseSun { 0% {transform:scale(1);filter:drop-shadow(0 0 15px #fde047)} 100% {transform:scale(1.1);filter:drop-shadow(0 0 25px #facc15)} }
-        .sprite { position:absolute;display:flex;align-items:center;justify-content:center;filter:drop-shadow(3px 5px 4px rgba(0,0,0,.3));z-index:10; }
-        .d-pad-btn { background:#f8fafc;border:3px solid var(--bordo-marron);color:var(--bordo-marron);border-radius:14px;box-shadow:0 4px 0 var(--granate);font-size:22px;display:flex;align-items:center;justify-content:center; }
-        .d-pad-btn:active,.btn-granate:active { transform:translateY(4px);box-shadow:0 0 0 var(--granate); }
-        .btn-granate { background:linear-gradient(to bottom,var(--granate),var(--bordo-marron));color:#fff;border:2px solid #3f1610;box-shadow:0 4px 0 #3f1610; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #1a202c;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+
+        :root {
+            --bordo-marron: #5e2118;
+            --granate: #800020;
+            --verde-prado: #40916c;
+            --cielo-alto: #3a86ff;
+            --cielo-bajo: #bae6fd;
+        }
+
+        /* Escenario Base */
+        #game-container {
+            background: linear-gradient(to bottom, var(--cielo-alto) 0%, var(--cielo-bajo) 40%, #74c69d 40%, var(--verde-prado) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Nubes Animadas */
+        .cloud-animated {
+            position: absolute;
+            animation: moveClouds linear infinite;
+        }
+        @keyframes moveClouds {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(100vw); }
+        }
+
+        /* Sol Radiante */
+        .sun-glow {
+            animation: pulseSun 3s ease-in-out infinite alternate;
+        }
+        @keyframes pulseSun {
+            0% { transform: scale(1); filter: drop-shadow(0 0 15px #fde047); }
+            100% { transform: scale(1.1); filter: drop-shadow(0 0 25px #facc15); }
+        }
+
+        /* Animación de Saltitos para el Grillo al Moverse */
+        .hopping {
+            animation: hop 0.25s infinite alternate ease-out;
+        }
+        @keyframes hop {
+            0% { transform: translateY(0) scale(var(--flip-x, 1), 1); }
+            100% { transform: translateY(-16px) scale(var(--flip-x, 1), 1); }
+        }
+
+        /* Personajes y Objetos */
+        .sprite {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(3px 5px 4px rgba(0,0,0,0.3));
+            z-index: 10;
+        }
+
+        /* Controles D-Pad táctiles */
+        .d-pad-btn {
+            background-color: #f8fafc;
+            border: 3px solid var(--bordo-marron);
+            color: var(--bordo-marron);
+            border-radius: 14px;
+            box-shadow: 0 4px 0 var(--granate);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.05s;
+        }
+        .d-pad-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 var(--granate);
+            background-color: #e2e8f0;
+        }
+
+        .btn-granate {
+            background: linear-gradient(to bottom, var(--granate), var(--bordo-marron));
+            color: white;
+            border: 2px solid #3f1610;
+            box-shadow: 0 4px 0 #3f1610;
+        }
+        .btn-granate:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #3f1610;
+        }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col items-center justify-center bg-slate-900">
-<div class="w-full max-w-5xl bg-white p-3 flex justify-between items-center z-20 border-b-4" style="border-color:var(--granate)"><h1 id="level-title" class="text-base md:text-2xl font-black" style="color:var(--bordo-marron)">🌱 Nivel 1: El Prado del Grillo</h1><div class="flex items-center gap-3 font-bold text-sm md:text-lg"><span id="suitcases-ui" style="color:var(--granate)">🧳 Valijas: 0/3</span><span id="progress-ui" class="text-amber-800 hidden">📍 Destino: 1 de 4</span><button id="audio-toggle" onclick="AudioEngine.toggleMute()" class="bg-amber-100 border-2 border-amber-600 rounded-lg px-2 py-1 text-xl" title="Activar/Silenciar Sonido">🔊</button></div></div>
-<div id="game-container" class="w-full max-w-5xl flex-1 border-x-4 shadow-2xl relative" style="border-color:var(--bordo-marron)"><div class="absolute top-4 right-8 text-6xl sun-glow z-0">☀️</div><div class="cloud-animated text-4xl top-8 z-0" style="animation-duration:35s">☁️</div><div class="cloud-animated text-5xl top-16 z-0" style="animation-duration:45s;animation-delay:-15s">☁️</div><div class="absolute top-[32%] w-full flex justify-between px-10 text-3xl opacity-80 z-0"><span>⛰️</span><span>🏡 ⛪ 🏡</span><span>🏔️</span></div><div class="absolute top-[42%] left-[8%] text-5xl z-1">🌳</div><div class="absolute top-[40%] left-[48%] text-4xl z-1">🌲</div><div class="absolute top-[43%] right-[12%] text-5xl z-1">🌳</div><div class="absolute bottom-[20%] left-[25%] text-2xl z-1">🌼</div><div class="absolute bottom-[10%] left-[60%] text-2xl z-1">🌻</div><div class="absolute bottom-[25%] right-[20%] text-2xl z-1">🌼</div><div id="valija-1" class="sprite text-3xl" style="left:18%;top:65%">🧳</div><div id="valija-2" class="sprite text-3xl" style="left:52%;top:78%">🧳</div><div id="valija-3" class="sprite text-3xl" style="left:82%;top:60%">🧳</div><div id="mosquito" class="sprite text-5xl" style="left:35%;top:68%">🦟</div><div id="vaca" class="sprite text-7xl hidden" style="left:78%;top:58%">🐄</div><div id="dest-1" class="sprite text-6xl hidden opacity-90" style="left:25%;top:55%">🏙️<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Ciudad</span></div><div id="dest-2" class="sprite text-6xl hidden opacity-90" style="left:50%;top:55%">🏔️<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Montańa</span></div><div id="dest-3" class="sprite text-6xl hidden opacity-90" style="left:72%;top:55%">🏖️<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Playa</span></div><div id="dest-4" class="sprite text-6xl hidden opacity-90" style="left:90%;top:55%">🏰<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Castillo</span></div><div id="player" class="sprite text-5xl z-30" style="left:60px;top:62%">🦗</div></div>
-<div class="w-full max-w-5xl bg-slate-200 p-3 flex justify-center items-center gap-4 border-t-4" style="border-color:var(--granate)"><div class="grid grid-cols-3 gap-2 w-48 h-32"><div></div><button class="d-pad-btn" ontouchstart="setKey('ArrowUp',true)" ontouchend="setKey('ArrowUp',false)" onmousedown="setKey('ArrowUp',true)" onmouseup="setKey('ArrowUp',false)">⬆️</button><div></div><button class="d-pad-btn" ontouchstart="setKey('ArrowLeft',true)" ontouchend="setKey('ArrowLeft',false)" onmousedown="setKey('ArrowLeft',true)" onmouseup="setKey('ArrowLeft',false)">⬅️</button><button class="d-pad-btn" ontouchstart="setKey('ArrowDown',true)" ontouchend="setKey('ArrowDown',false)" onmousedown="setKey('ArrowDown',true)" onmouseup="setKey('ArrowDown',false)">⬇️</button><button class="d-pad-btn" ontouchstart="setKey('ArrowRight',true)" ontouchend="setKey('ArrowRight',false)" onmousedown="setKey('ArrowRight',true)" onmouseup="setKey('ArrowRight',false)">➡️</button></div><div class="text-xs md:text-sm font-bold text-slate-700 text-center uppercase tracking-wide">Usa las flechas<br>para moverte y saltar</div></div>
-<div id="dialog-overlay" class="absolute inset-0 bg-black/75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm"><div class="bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border-4" style="border-color:var(--bordo-marron)"><h2 id="dialog-title" class="text-2xl md:text-3xl font-black mb-3" style="color:var(--granate)">TíŁ´tulo</h2><p id="dialog-text" class="text-base md:text-lg text-slate-700 mb-6 font-semibold leading-relaxed">Mensaje</p><div id="dialog-options" class="flex flex-col gap-2.5"></div></div></div>
-<script>
-const AudioEngine={ctx:null,isMuted:false,bgmTimer:null,bgmStep:0,hopCooldown:0,init(){if(!this.ctx){const A=window.AudioContext||window.webkitAudioContext;this.ctx=new A()}if(this.ctx.state==='suspended')this.ctx.resume();if(!this.bgmTimer&&!this.isMuted)this.startBGM()},toggleMute(){this.isMuted=!this.isMuted;const b=document.getElementById('audio-toggle');if(this.isMuted){b.innerText='🔇';this.stopBGM()}else{b.innerText='🔊';this.init();this.startBGM()}},tone(freq,d=.12,type='sine',vol=.15){if(this.isMuted||!this.ctx)return;const n=this.ctx.currentTime,o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.setValueAtTime(freq,n);g.gain.setValueAtTime(vol,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(this.ctx.destination);o.start(n);o.stop(n+d)},playHop(){const n=this.ctx?.currentTime||0;if(n<this.hopCooldown)return;this.hopCooldown=n+.22;this.tone(550,.12)},playPickup(){[523.25,659.25,783.99,1046.50].forEach((f,i)=>setTimeout(()=>this.tone(f,.25,'triangle',.2),i*60))},playCorrect(){[440,554.37,659.25,880].forEach((f,i)=>setTimeout(()=>this.tone(f,.3,'sine',.25),i*80))},playWrong(){this.tone(220,.2,'sawtooth');setTimeout(()=>this.tone(180,.2,'sawtooth'),150)},playMoo(){this.tone(130,.65,'sawtooth',.2)},playVictory(){[523.25,659.25,783.99,1046.50,880,1046.50].forEach((f,i)=>setTimeout(()=>this.tone(f,.3,'triangle',.25),i*180))},playDialog(){this.tone(600,.05,'sine',.1)},startBGM(){if(this.bgmTimer)return;const notes=[261.63,329.63,392.00,329.63,349.23,392.00,440.00,392.00];this.bgmTimer=setInterval(()=>{if(!this.isMuted&&this.ctx)this.tone(notes[this.bgmStep++%notes.length],.35,'sine',.04)},400)},stopBGM(){clearInterval(this.bgmTimer);this.bgmTimer=null}};
-const unlockAudio=()=>{AudioEngine.init();window.removeEventListener('click',unlockAudio);window.removeEventListener('touchstart',unlockAudio);window.removeEventListener('keydown',unlockAudio)};window.addEventListener('click',unlockAudio);window.addEventListener('touchstart',unlockAudio);window.addEventListener('keydown',unlockAudio);
-const player=document.getElementById('player'),container=document.getElementById('game-container'),keys={ArrowUp:false,ArrowDown:false,ArrowLeft:false,ArrowRight:false};let gameState='LEVEL_1',playerPos={x:60,y:300},suitcases=0,talkedToMosquito=false,currentDestinationIndex=0;const speed=4.5;const questions=[{q:'1. ¿QuéłŁ hizo el grillo cuando quiso viajar?',options:[['Se quedo en casa sin hacer nada.',false],['Le pidio ayuda a su amigo el mosquito.',true],['Se compro un avion y viajo solo.',false]]},{q:'2. ¿QuiéłŁn lo ayudo finalmente a viajar por el mundo?',options:[['Una mariposa que le presto sus alas.',false],['Una vaca generosa que lo subio a su lomo.',true],['Una hormiga trabajadora.',false]]},{q:'3. ¿Por qué es importante la generosidad de la Señora Vaca?',options:[['Nos hace felices y ayuda a otros a cumplir sus sueños.',true],['Porque nos da dinero.',false],['Porque nos lleva a la escuela.',false]]},{q:'4. ¿QuéłŁ aprendiste de esta historia?',options:[['Que la amistad y la generosidad son valores importantes.',true],['Que los grillos no pueden viajar.',false],['Que las vacas no hablan.',false]]}];
-function setKey(k,v){if(k in keys)keys[k]=v}document.addEventListener('keydown',e=>{if(e.key in keys){keys[e.key]=true;e.preventDefault()}});document.addEventListener('keyup',e=>{if(e.key in keys){keys[e.key]=false;e.preventDefault()}});
-function showDialog(title,text,options,callback){document.getElementById('dialog-title').innerText=title;document.getElementById('dialog-text').innerText=text;const c=document.getElementById('dialog-options');c.innerHTML='';options.forEach((o,i)=>{const b=document.createElement('button');b.innerText=o;b.className='btn-granate py-3 px-6 rounded-xl font-bold text-lg transition-transform';b.onclick=()=>callback(i);c.appendChild(b)});document.getElementById('dialog-overlay').classList.remove('hidden');AudioEngine.playDialog()}function hideDialog(){document.getElementById('dialog-overlay').classList.add('hidden')}
-function startQuestionPhase(){gameState='QUESTION';const q=questions[currentDestinationIndex];showDialog('📝 ¡Pregunta de viaje!',q.q,q.options.map(x=>x[0]),i=>{if(q.options[i][1]){AudioEngine.playCorrect();showDialog('Correcto!','Muy bien! El grillo puede continuar su viaje.',['Seguir!','Terminar'],c=>{if(c===0){currentDestinationIndex=(currentDestinationIndex+1)%4;gameState='LEVEL_2';hideDialog()}else{AudioEngine.playVictory();showDialog('Gracias por jugar!','El grillo tuvo un viaje increible gracias a tu ayuda!',['Jugar de nuevo'],()=>location.reload())}})}else{AudioEngine.playWrong();showDialog('Casi...','Intenta nuevamente.',q.options.map(x=>x[0]),()=>startQuestionPhase())}})}
-function unlockDestinations(){gameState='LEVEL_2';document.getElementById('progress-ui').classList.remove('hidden');['dest-1','dest-2','dest-3','dest-4'].forEach(x=>document.getElementById(x).classList.remove('hidden'));showDialog('Valijas listas!','Recolectaste las 3 valijas! A donde quiere viajar el grillo?',['Ciudad','Montana','Playa','Castillo'],i=>{currentDestinationIndex=i;startQuestionPhase()})}
-function checkCollisions(){const p=player.getBoundingClientRect();for(let i=1;i<=3;i++){const v=document.getElementById('valija-'+i);if(v&&!v.classList.contains('hidden')){const r=v.getBoundingClientRect();if(p.left<r.right&&p.right>r.left&&p.top<r.bottom&&p.bottom>r.top){v.classList.add('hidden');suitcases++;document.getElementById('suitcases-ui').innerText='🧳 Valijas: '+suitcases+'/3';AudioEngine.playPickup();if(suitcases===3)unlockDestinations()}}}const m=document.getElementById('mosquito');if(m&&!talkedToMosquito){const r=m.getBoundingClientRect();if(p.left<r.right&&p.right>r.left&&p.top<r.bottom&&p.bottom>r.top){talkedToMosquito=true;showDialog('🦟 Hola Grillo!','Para viajar lejos necesitamos ayuda de nuestros amigos.',['Entiendo!'],()=>hideDialog())}}}
-function loop(){if(gameState==='LEVEL_1'){if(keys.ArrowLeft){playerPos.x=Math.max(0,playerPos.x-speed);AudioEngine.playHop()}if(keys.ArrowRight){playerPos.x=Math.min(container.offsetWidth-50,playerPos.x+speed);AudioEngine.playHop()}if(keys.ArrowUp){playerPos.y=Math.max(0,playerPos.y-speed);AudioEngine.playHop()}if(keys.ArrowDown){playerPos.y=Math.min(container.offsetHeight-50,playerPos.y+speed);AudioEngine.playHop()}player.style.left=playerPos.x+'px';player.style.top=playerPos.y+'px';checkCollisions()}requestAnimationFrame(loop)}loop();
-</script></body></html>
+
+    <!-- HUD / BARRA SUPERIOR -->
+    <div class="w-full max-w-5xl bg-white p-3 flex justify-between items-center z-20 border-b-4" style="border-color: var(--granate);">
+        <h1 id="level-title" class="text-base md:text-2xl font-black" style="color: var(--bordo-marron);">🌱 Nivel 1: El Prado del Grillo</h1>
+        
+        <div class="flex items-center gap-3 font-bold text-sm md:text-lg">
+            <span id="suitcases-ui" style="color: var(--granate);">🧳 Valijas: 0/3</span>
+            <span id="progress-ui" class="text-amber-800 hidden">📍 Destino: 1 de 4</span>
+            
+            <!-- Botón de Audio Mute/Unmute -->
+            <button id="audio-toggle" onclick="AudioEngine.toggleMute()" class="bg-amber-100 border-2 border-amber-600 rounded-lg px-2 py-1 text-xl hover:bg-amber-200 transition-colors" title="Activar/Silenciar Sonido">
+                🔊
+            </button>
+        </div>
+    </div>
+
+    <!-- ESCENARIO DEL JUEGO -->
+    <div id="game-container" class="w-full max-w-5xl flex-1 border-x-4 shadow-2xl relative" style="border-color: var(--bordo-marron);">
+        
+        <!-- Elementos del Paisaje -->
+        <div class="absolute top-4 right-8 text-6xl sun-glow z-0">☀️</div>
+        
+        <div class="cloud-animated text-4xl top-8 z-0" style="animation-duration: 35s; animation-delay: 0s;">☁️</div>
+        <div class="cloud-animated text-5xl top-16 z-0" style="animation-duration: 45s; animation-delay: -15s;">☁️</div>
+
+        <!-- Montañas y Aldea en el Horizonte -->
+        <div class="absolute top-[32%] w-full flex justify-between px-10 text-3xl opacity-80 z-0">
+            <span>⛰️</span>
+            <span>🏡 ⛪ 🏡</span>
+            <span>🏔️</span>
+        </div>
+
+        <!-- Árboles y Vegetación en el Prado -->
+        <div class="absolute top-[42%] left-[8%] text-5xl z-1">🌳</div>
+        <div class="absolute top-[40%] left-[48%] text-4xl z-1">🌲</div>
+        <div class="absolute top-[43%] right-[12%] text-5xl z-1">🌳</div>
+
+        <!-- Charcos de Lodo y Flores -->
+        <div class="absolute bottom-[20%] left-[25%] text-2xl z-1">🌼</div>
+        <div class="absolute bottom-[10%] left-[60%] text-2xl z-1">🌻</div>
+        <div class="absolute bottom-[25%] right-[20%] text-2xl z-1">🌼</div>
+
+        <!-- Elementos Intermediarios - Nivel 1 -->
+        <div id="valija-1" class="sprite text-3xl" style="left: 18%; top: 65%;">🧳</div>
+        <div id="valija-2" class="sprite text-3xl" style="left: 52%; top: 78%;">🧳</div>
+        <div id="valija-3" class="sprite text-3xl" style="left: 82%; top: 60%;">🧳</div>
+        
+        <div id="mosquito" class="sprite text-5xl" style="left: 35%; top: 68%;">🦟</div>
+        <div id="vaca" class="sprite text-7xl hidden" style="left: 78%; top: 58%;">🐄</div>
+
+        <!-- Elementos del Nivel 2: Estaciones de Viaje (Desbloqueables) -->
+        <div id="dest-1" class="sprite text-6xl hidden opacity-90" style="left: 25%; top: 55%;">🏙️<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Ciudad</span></div>
+        <div id="dest-2" class="sprite text-6xl hidden opacity-90" style="left: 50%; top: 55%;">🏔️<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Montaña</span></div>
+        <div id="dest-3" class="sprite text-6xl hidden opacity-90" style="left: 72%; top: 55%;">🏖️<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Playa</span></div>
+        <div id="dest-4" class="sprite text-6xl hidden opacity-90" style="left: 90%; top: 55%;">🏰<span class="absolute -top-6 text-xs bg-white px-2 py-0.5 rounded border border-gray-400 font-bold">Castillo</span></div>
+
+        <!-- Jugador (Grillo) -->
+        <div id="player" class="sprite text-5xl z-30" style="left: 60px; top: 62%;">🦗</div>
+
+    </div>
+
+    <!-- CONTROLES TÁCTILES / MÓVIL -->
+    <div class="w-full max-w-5xl bg-slate-200 p-3 flex justify-center items-center gap-4 border-t-4" style="border-color: var(--granate);">
+        <div class="grid grid-cols-3 gap-2 w-48 h-32">
+            <div></div>
+            <button class="d-pad-btn" ontouchstart="setKey('ArrowUp', true)" ontouchend="setKey('ArrowUp', false)" onmousedown="setKey('ArrowUp', true)" onmouseup="setKey('ArrowUp', false)">⬆️</button>
+            <div></div>
+            <button class="d-pad-btn" ontouchstart="setKey('ArrowLeft', true)" ontouchend="setKey('ArrowLeft', false)" onmousedown="setKey('ArrowLeft', true)" onmouseup="setKey('ArrowLeft', false)">⬅️</button>
+            <button class="d-pad-btn" ontouchstart="setKey('ArrowDown', true)" ontouchend="setKey('ArrowDown', false)" onmousedown="setKey('ArrowDown', true)" onmouseup="setKey('ArrowDown', false)">⬇️</button>
+            <button class="d-pad-btn" ontouchstart="setKey('ArrowRight', true)" ontouchend="setKey('ArrowRight', false)" onmousedown="setKey('ArrowRight', true)" onmouseup="setKey('ArrowRight', false)">➡️</button>
+        </div>
+        <div class="text-xs md:text-sm font-bold text-slate-700 text-center uppercase tracking-wide">
+            Usa las flechas<br>para moverte y saltar
+        </div>
+    </div>
+
+    <!-- VENTANA MODAL (DIÁLOGOS Y CUESTIONARIOS) -->
+    <div id="dialog-overlay" class="absolute inset-0 bg-black/75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-6 md:p-8 max-w-lg w-full text-center shadow-2xl border-4" style="border-color: var(--bordo-marron);">
+            <h2 id="dialog-title" class="text-2xl md:text-3xl font-black mb-3" style="color: var(--granate);">Título</h2>
+            <p id="dialog-text" class="text-base md:text-lg text-slate-700 mb-6 font-semibold leading-relaxed">Mensaje</p>
+            <div id="dialog-options" class="flex flex-col gap-2.5">
+                <!-- Inyección dinámica de opciones -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE AUDIO SINTETIZADO EN TIEMPO REAL -->
+    <script>
+        const AudioEngine = {
+            ctx: null,
+            isMuted: false,
+            bgmTimer: null,
+            bgmStep: 0,
+            hopCooldown: 0,
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                if (!this.bgmTimer && !this.isMuted) {
+                    this.startBGM();
+                }
+            },
+
+            toggleMute() {
+                this.isMuted = !this.isMuted;
+                const btn = document.getElementById('audio-toggle');
+                if (this.isMuted) {
+                    btn.innerText = '🔇';
+                    this.stopBGM();
+                } else {
+                    btn.innerText = '🔊';
+                    this.init();
+                    this.startBGM();
+                }
+            },
+
+            // EFECTO: Salto del Grillo (Pitch Bend subida rapida)
+            playHop() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                if (now < this.hopCooldown) return;
+                this.hopCooldown = now + 0.22;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(320, now);
+                osc.frequency.exponentialRampToValueAtTime(780, now + 0.12);
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.12);
+            },
+
+            // EFECTO: Recolección de Valija (Campana / Chime brillante)
+            playPickup() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + (i * 0.06));
+
+                    gain.gain.setValueAtTime(0.2, now + (i * 0.06));
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + (i * 0.06) + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now + (i * 0.06));
+                    osc.stop(now + (i * 0.06) + 0.25);
+                });
+            },
+
+            // EFECTO: Respuesta Correcta (Fanfarria alegre)
+            playCorrect() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+
+                    gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.3);
+                });
+            },
+
+            // EFECTO: Respuesta Incorrecta (Tono suave doble)
+            playWrong() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                [220, 180].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.15);
+
+                    gain.gain.setValueAtTime(0.15, now + idx * 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.15 + 0.2);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now + idx * 0.15);
+                    osc.stop(now + idx * 0.15 + 0.2);
+                });
+            },
+
+            // EFECTO: Encuentro Vaca / Subida al Lomo
+            playMoo() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(130, now);
+                osc.frequency.linearRampToValueAtTime(160, now + 0.2);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.6);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.65);
+            },
+
+            // EFECTO: Victoria Final
+            playVictory() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const melody = [523.25, 659.25, 783.99, 1046.50, 880, 1046.50];
+                const durations = [0.15, 0.15, 0.15, 0.3, 0.2, 0.5];
+
+                let timeAcc = now;
+                melody.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, timeAcc);
+
+                    gain.gain.setValueAtTime(0.25, timeAcc);
+                    gain.gain.exponentialRampToValueAtTime(0.001, timeAcc + durations[i]);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(timeAcc);
+                    osc.stop(timeAcc + durations[i]);
+
+                    timeAcc += durations[i] + 0.03;
+                });
+            },
+
+            // EFECTO: Sonido Pop Diálogo
+            playDialog() {
+                if (this.isMuted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.05);
+            },
+
+            // MUSICA DE FONDO (Melodía alegre en bucle)
+            startBGM() {
+                if (this.bgmTimer) return;
+                const bgmNotes = [261.63, 329.63, 392.00, 329.63, 349.23, 392.00, 440.00, 392.00];
+                this.bgmStep = 0;
+
+                this.bgmTimer = setInterval(() => {
+                    if (this.isMuted || !this.ctx) return;
+                    const now = this.ctx.currentTime;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(bgmNotes[this.bgmStep], now);
+
+                    gain.gain.setValueAtTime(0.04, now); // Volumen suave de fondo
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+
+                    this.bgmStep = (this.bgmStep + 1) % bgmNotes.length;
+                }, 400);
+            },
+
+            stopBGM() {
+                if (this.bgmTimer) {
+                    clearInterval(this.bgmTimer);
+                    this.bgmTimer = null;
+                }
+            }
+        };
+
+        // Escuchar primera interacción global para activar AudioContext
+        const unlockAudio = () => {
+            AudioEngine.init();
+            window.removeEventListener('click', unlockAudio);
+            window.removeEventListener('touchstart', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+        };
+        window.addEventListener('click', unlockAudio);
+        window.addEventListener('touchstart', unlockAudio);
+        window.addEventListener('keydown', unlockAudio);
+    </script>
+
+    <!-- LÓGICA DEL JUEGO -->
+    <script>
+        const player = document.getElementById('player');
+        const container = document.getElementById('game-container');
+        
+        // Estado del Juego
+        let gameState = 'LEVEL_1'; 
+        let playerPos = { x: 60, y: 300 };
+        const speed = 4.5;
+        let suitcases = 0;
+        let talkedToMosquito = false;
+        let currentDestinationIndex = 0;
+
+        // Cuestionario Educativo
+        const questions = [
+            {
+                q: "1. ¿Qué hizo el grillo cuando quiso viajar?",
+                options: [
+                    { text: "Se quedó en casa sin hacer nada.", correct: false },
+                    { text: "Le pidió ayuda a su amigo el mosquito.", correct: true },
+                    { text: "Se compró un avión y viajó solo.", correct: false }
+                ]
+            },
+            {
+                q: "2. ¿Quién lo ayudó finalmente a viajar por el mundo?",
+                options: [
+                    { text: "Una mariposa que le prestó sus alas.", correct: false },
+                    { text: "Una vaca generosa que lo subió a su lomo.", correct: true },
+                    { text: "Una hormiga trabajadora.", correct: false }
+                ]
+            },
+            {
+                q: "3. ¿Por qué es importante la generosidad de la Señora Vaca?",
+                options: [
+                    { text: "Nos hace felices y nos ayuda a colaborar con otros.", correct: true },
+                    { text: "Nos ayuda a presumir ante los demás.", correct: false },
+                    { text: "Nos hace perder el tiempo.", correct: false }
+                ]
+            },
+            {
+                q: "4. ¿Qué gran enseñanza bíblica nos deja esta historia?",
+                options: [
+                    { text: "Que los sueños son imposibles.", correct: false },
+                    { text: "Que para Dios nada hay imposible (Lucas 1:37).", correct: true },
+                    { text: "Que no debemos pedir ayuda a los amigos.", correct: false }
+                ]
+            }
+        ];
+
+        // Estado Teclas
+        const keys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+
+        window.addEventListener('keydown', (e) => { 
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = true; 
+            }
+        });
+        window.addEventListener('keyup', (e) => { 
+            if (keys.hasOwnProperty(e.key)) {
+                keys[e.key] = false; 
+            }
+        });
+
+        function setKey(key, value) {
+            keys[key] = value;
+            AudioEngine.init();
+        }
+
+        // Bucle Principal
+        function gameLoop() {
+            if (gameState !== 'PAUSED') {
+                movePlayer();
+                checkCollisions();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
+        function movePlayer() {
+            const rect = container.getBoundingClientRect();
+            const playerSize = 60;
+            const skyLimit = rect.height * 0.42;
+            
+            let isMoving = false;
+
+            if (keys.ArrowUp && playerPos.y > skyLimit) { playerPos.y -= speed; isMoving = true; }
+            if (keys.ArrowDown && playerPos.y < rect.height - playerSize) { playerPos.y += speed; isMoving = true; }
+            if (keys.ArrowLeft && playerPos.x > 10) { playerPos.x -= speed; isMoving = true; setFacing('left'); }
+            if (keys.ArrowRight && playerPos.x < rect.width - playerSize) { playerPos.x += speed; isMoving = true; setFacing('right'); }
+
+            player.style.left = playerPos.x + 'px';
+            player.style.top = playerPos.y + 'px';
+
+            // Animación y Sonido de Saltos
+            if (isMoving) {
+                player.classList.add('hopping');
+                AudioEngine.playHop();
+            } else {
+                player.classList.remove('hopping');
+            }
+        }
+
+        // Orientación exacta del Grillo
+        function setFacing(dir) {
+            if (dir === 'right') {
+                player.style.setProperty('--flip-x', '-1');
+                player.style.transform = 'scaleX(-1)';
+            } else if (dir === 'left') {
+                player.style.setProperty('--flip-x', '1');
+                player.style.transform = 'scaleX(1)';
+            }
+        }
+
+        function checkCollisions() {
+            const px = playerPos.x + 30;
+            const py = playerPos.y + 30;
+
+            if (gameState === 'LEVEL_1') {
+                // Recolección de Valijas
+                ['valija-1', 'valija-2', 'valija-3'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && !el.classList.contains('hidden')) {
+                        if (getDistance(px, py, el) < 45) {
+                            el.classList.add('hidden');
+                            suitcases++;
+                            AudioEngine.playPickup();
+                            document.getElementById('suitcases-ui').innerText = `🧳 Valijas: ${suitcases}/3`;
+                            if (suitcases === 3) {
+                                showMessage("¡Valijas Listas! 🧳", "Has recogido todo tu equipaje. Ve a hablar con tu amigo el Mosquito 🦟.");
+                            }
+                        }
+                    }
+                });
+
+                // Diálogo con Mosquito
+                const mosqEl = document.getElementById('mosquito');
+                if (!talkedToMosquito && getDistance(px, py, mosqEl) < 55) {
+                    if (suitcases < 3) {
+                        showMessage("Mosquito dice: 🦟", "¡Hola Grillito! junta tus 3 valijas antes de salir a viajar.");
+                        playerPos.x -= 25; 
+                    } else {
+                        talkedToMosquito = true;
+                        showMessage("¡Gran Noticia! 🦟", "El Mosquito te aconseja: «En el campo hay una Vaca 🐄 y ella hace viajes gratuitos». ¡Búscala a la derecha del prado!");
+                        document.getElementById('vaca').classList.remove('hidden');
+                    }
+                }
+
+                // Transición al Nivel 2 al encontrar a la Vaca
+                const vacaEl = document.getElementById('vaca');
+                if (!vacaEl.classList.contains('hidden') && getDistance(px, py, vacaEl) < 65) {
+                    AudioEngine.playMoo();
+                    startLevel2();
+                }
+            } 
+            else if (gameState === 'LEVEL_2') {
+                // Llegada a Estaciones del Viaje
+                const targetDest = document.getElementById(`dest-${currentDestinationIndex + 1}`);
+                if (targetDest && !targetDest.classList.contains('visited')) {
+                    if (getDistance(px, py, targetDest) < 60) {
+                        askQuestion(currentDestinationIndex);
+                    }
+                }
+            }
+        }
+
+        function getDistance(px, py, element) {
+            const rect1 = container.getBoundingClientRect();
+            const rect2 = element.getBoundingClientRect();
+            const ex = (rect2.left - rect1.left) + (rect2.width / 2);
+            const ey = (rect2.top - rect1.top) + (rect2.height / 2);
+            return Math.hypot(px - ex, py - ey);
+        }
+
+        function startLevel2() {
+            gameState = 'PAUSED';
+            resetKeys();
+
+            document.getElementById('level-title').innerText = "✈️ Nivel 2: El Gran Viaje por el Mundo";
+            document.getElementById('suitcases-ui').classList.add('hidden');
+            document.getElementById('progress-ui').classList.remove('hidden');
+
+            // Ocultar Nivel 1
+            document.getElementById('valija-1').classList.add('hidden');
+            document.getElementById('valija-2').classList.add('hidden');
+            document.getElementById('valija-3').classList.add('hidden');
+            document.getElementById('mosquito').classList.add('hidden');
+            document.getElementById('vaca').classList.add('hidden');
+
+            // Mostrar Nivel 2
+            document.getElementById('dest-1').classList.remove('hidden');
+            document.getElementById('dest-2').classList.remove('hidden');
+            document.getElementById('dest-3').classList.remove('hidden');
+            document.getElementById('dest-4').classList.remove('hidden');
+
+            // Grillo montado en la Vaca
+            player.innerText = "🐄🦗";
+            player.classList.replace('text-5xl', 'text-6xl');
+            playerPos = { x: 40, y: container.getBoundingClientRect().height * 0.58 };
+
+            showMessage("¡A Viajar! 🐄🦗", "La Señora Vaca ha subido al Grillito a su lomo.<br><br><b>Camina hacia la derecha</b> para visitar cada destino y responder las preguntas.");
+        }
+
+        function askQuestion(index) {
+            gameState = 'PAUSED';
+            resetKeys();
+            AudioEngine.playDialog();
+
+            const qData = questions[index];
+            document.getElementById('dialog-overlay').classList.remove('hidden');
+            document.getElementById('dialog-title').innerText = `📍 Destino ${index + 1}`;
+            document.getElementById('dialog-text').innerText = qData.q;
+
+            const optionsContainer = document.getElementById('dialog-options');
+            optionsContainer.innerHTML = '';
+
+            qData.options.forEach((opt) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-xl text-left border-2 border-slate-300 transition-colors text-sm md:text-base";
+                btn.innerText = opt.text;
+                btn.onclick = () => handleAnswer(opt.correct);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(isCorrect) {
+            const options = document.getElementById('dialog-options');
+            if (isCorrect) {
+                AudioEngine.playCorrect();
+                const targetDest = document.getElementById(`dest-${currentDestinationIndex + 1}`);
+                if (targetDest) targetDest.classList.add('visited', 'opacity-40');
+
+                currentDestinationIndex++;
+                document.getElementById('progress-ui').innerText = `📍 Destino: ${Math.min(currentDestinationIndex + 1, 4)} de 4`;
+
+                if (currentDestinationIndex < questions.length) {
+                    options.innerHTML = `
+                        <p class="text-green-700 font-black text-xl mb-3">¡Respuesta Correcta! ⭐</p>
+                        <button onclick="closeDialog()" class="btn-granate w-full font-bold py-3 px-4 rounded-xl text-lg uppercase">Avanzar al Siguiente Lugar ➡️</button>
+                    `;
+                } else {
+                    showVictory();
+                }
+            } else {
+                AudioEngine.playWrong();
+                options.innerHTML = `
+                    <p class="text-amber-800 font-bold text-lg mb-3">Inténtalo de nuevo. ¡Recuerda lo que nos enseña la historia!</p>
+                    <button onclick="askQuestion(${currentDestinationIndex})" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-4 rounded-xl text-lg border-2 border-amber-700">Reintentar</button>
+                `;
+            }
+        }
+
+        function showVictory() {
+            gameState = 'FINISHED';
+            AudioEngine.playVictory();
+
+            document.getElementById('dialog-overlay').classList.remove('hidden');
+            document.getElementById('dialog-title').innerText = "🎉 ¡Felicitaciones! 🎉";
+            document.getElementById('dialog-title').style.color = "var(--verde-prado)";
+
+            document.getElementById('dialog-text').innerHTML = `
+                El Grillito y la Señora Vaca recorrieron inolvidables lugares.<br><br>
+                <div class="p-3 bg-amber-50 rounded-xl border-2 border-amber-300 my-2">
+                    <span class="font-black text-amber-900 text-lg">"Porque nada hay imposible para Dios."</span><br>
+                    <span class="font-bold text-amber-700 text-sm">(Lucas 1:37)</span>
+                </div>
+                Con esfuerzo, amistad, generosidad y fe, ¡puedes lograr todo lo que te propongas!
+            `;
+
+            const options = document.getElementById('dialog-options');
+            options.innerHTML = `
+                <button onclick="location.reload()" class="btn-granate w-full font-bold py-3 px-4 rounded-xl text-lg uppercase">🔄 Jugar de Nuevo</button>
+            `;
+        }
+
+        function showMessage(title, text) {
+            gameState = 'PAUSED';
+            resetKeys();
+            AudioEngine.playDialog();
+
+            document.getElementById('dialog-overlay').classList.remove('hidden');
+            document.getElementById('dialog-title').innerText = title;
+            document.getElementById('dialog-text').innerHTML = text;
+
+            const optionsContainer = document.getElementById('dialog-options');
+            optionsContainer.innerHTML = `
+                <button onclick="closeDialog()" class="btn-granate w-full font-bold py-3 px-4 rounded-xl text-lg uppercase">¡Entendido! 👍</button>
+            `;
+        }
+
+        function closeDialog() {
+            document.getElementById('dialog-overlay').classList.add('hidden');
+            player.classList.remove('hopping');
+            if (gameState !== 'FINISHED') {
+                gameState = document.getElementById('level-title').innerText.includes("Nivel 2") ? 'LEVEL_2' : 'LEVEL_1';
+            }
+        }
+
+        function resetKeys() {
+            keys.ArrowUp = false; keys.ArrowDown = false; keys.ArrowLeft = false; keys.ArrowRight = false;
+        }
+
+        // Bucle del Juego
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
