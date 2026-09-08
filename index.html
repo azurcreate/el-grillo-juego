@@ -149,6 +149,89 @@ body {
         font-size: 12px;
         padding: 8px 10px;
     }
+}/* Controles móviles compactos */
+#mobile-controls {
+    display: none;
+}
+
+@media (max-width: 700px) {
+    #mobile-controls {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: env(safe-area-inset-bottom, 10px);
+        height: 118px;
+        z-index: 900;
+        pointer-events: none;
+    }
+
+    #joystick-area {
+        position: absolute;
+        left: 18px;
+        bottom: 8px;
+        width: 100px;
+        height: 100px;
+        pointer-events: auto;
+        touch-action: none;
+    }
+
+    #joystick-base {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 92px;
+        height: 92px;
+        border-radius: 50%;
+        background: rgba(94, 33, 24, 0.28);
+        border: 3px solid rgba(255, 255, 255, 0.75);
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    #joystick-stick {
+        position: absolute;
+        left: 26px;
+        top: 26px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(128, 0, 32, 0.88);
+        border: 3px solid #ffffff;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        transition: transform 0.08s ease-out;
+    }
+
+    #jump-button {
+        position: absolute;
+        right: 22px;
+        bottom: 16px;
+        width: 68px;
+        height: 68px;
+        border-radius: 50%;
+        border: 3px solid #ffffff;
+        background: rgba(128, 0, 32, 0.9);
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 900;
+        box-shadow: 0 4px 0 #3f1610;
+        pointer-events: auto;
+        touch-action: none;
+    }
+
+    #jump-button:active {
+        transform: translateY(4px);
+        box-shadow: 0 0 0 #3f1610;
+    }
+
+    #game-container {
+        height: calc(100svh - 128px);
+        min-height: 300px;
+    }
+}
+
+@media (min-width: 701px) {
+    #mobile-controls {
+        display: none;
+    }
 }
     </style>
 <link rel="manifest" href="manifest.json">
@@ -223,20 +306,19 @@ body {
 
     </div>
 
-    <!-- CONTROLES TÁCTILES / MÓVIL -->
-    <div class="w-full max-w-5xl bg-slate-200 p-3 flex justify-center items-center gap-4 border-t-4" style="border-color: var(--granate);">
-        <div class="grid grid-cols-3 gap-2 w-48 h-32">
-            <div></div>
-            <button class="d-pad-btn" ontouchstart="setKey('ArrowUp', true)" ontouchend="setKey('ArrowUp', false)" onmousedown="setKey('ArrowUp', true)" onmouseup="setKey('ArrowUp', false)">⬆️</button>
-            <div></div>
-            <button class="d-pad-btn" ontouchstart="setKey('ArrowLeft', true)" ontouchend="setKey('ArrowLeft', false)" onmousedown="setKey('ArrowLeft', true)" onmouseup="setKey('ArrowLeft', false)">⬅️</button>
-            <button class="d-pad-btn" ontouchstart="setKey('ArrowDown', true)" ontouchend="setKey('ArrowDown', false)" onmousedown="setKey('ArrowDown', true)" onmouseup="setKey('ArrowDown', false)">⬇️</button>
-            <button class="d-pad-btn" ontouchstart="setKey('ArrowRight', true)" ontouchend="setKey('ArrowRight', false)" onmousedown="setKey('ArrowRight', true)" onmouseup="setKey('ArrowRight', false)">➡️</button>
-        </div>
-        <div class="text-xs md:text-sm font-bold text-slate-700 text-center uppercase tracking-wide">
-            Usa las flechas<br>para moverte y saltar
+   <!-- CONTROLES TÁCTILES COMPACTOS -->
+<div id="mobile-controls" aria-label="Controles táctiles del juego">
+    <div id="joystick-area">
+        <div id="joystick-base">
+            <div id="joystick-stick"></div>
         </div>
     </div>
+
+    <button id="jump-button" type="button" aria-label="Saltar">
+        ↑
+    </button>
+</div>
+  
 
     <!-- VENTANA MODAL (DIÁLOGOS Y CUESTIONARIOS) -->
     <div id="dialog-overlay" class="absolute inset-0 bg-black/75 flex items-center justify-center p-4 z-50 hidden backdrop-blur-sm">
