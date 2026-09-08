@@ -120,8 +120,41 @@ body {
         min-height: 52px;
     }
 }
+    #fullscreen-btn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 9999;
+    padding: 10px 14px;
+    border: 2px solid #3f1610;
+    border-radius: 12px;
+    background: #800020;
+    color: #ffffff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    box-shadow: 0 3px 0 #3f1610;
+    cursor: pointer;
+}
+
+#fullscreen-btn:active {
+    transform: translateY(3px);
+    box-shadow: none;
+}
+
+@media (max-width: 600px) {
+    #fullscreen-btn {
+        top: 8px;
+        right: 8px;
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+}
     </style>
 </head>
+    <button id="fullscreen-btn" type="button">
+  ⛶ Jugar a pantalla completa
+</button>
 <body class="w-full flex flex-col items-center justify-start bg-slate-900">
 
     <!-- HUD / BARRA SUPERIOR -->
@@ -752,6 +785,32 @@ body {
 
         // Bucle del Juego
         requestAnimationFrame(gameLoop);
-    </script>
+    </script><script>
+    const fullscreenButton = document.getElementById('fullscreen-btn');
+
+    fullscreenButton.addEventListener('click', async () => {
+        const gameRoot = document.documentElement;
+
+        try {
+            if (!document.fullscreenElement) {
+                if (gameRoot.requestFullscreen) {
+                    await gameRoot.requestFullscreen();
+                } else if (gameRoot.webkitRequestFullscreen) {
+                    gameRoot.webkitRequestFullscreen();
+                }
+            } else if (document.exitFullscreen) {
+                await document.exitFullscreen();
+            }
+        } catch (error) {
+            console.log('Pantalla completa no disponible:', error);
+        }
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        fullscreenButton.textContent = document.fullscreenElement
+            ? '✕ Salir de pantalla completa'
+            : '⛶ Jugar a pantalla completa';
+    });
+</script>
 </body>
 </html>
